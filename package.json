@@ -1,0 +1,13 @@
+{
+  "name": "minip-game-api",
+  "version": "1.0.0",
+  "description": "小游戏api",
+  "main": "app.js",
+  "author": "llw",
+  "license": "MIT",
+  "dependencies": {
+    "koa": "^2.5.1",
+    "koa-body": "^4.0.3",
+    "koa-router": "^7.4.0"
+  }
+}

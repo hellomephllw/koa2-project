@@ -1,0 +1,1 @@
+module.exports = new require('koa-router')({prefix: '/api'});
