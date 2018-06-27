@@ -1,12 +1,16 @@
 const Koa = require('koa');
 const app = new Koa();
 const KoaBody = require('koa-body');
+const database = require('./utils/Database');
 global.router = require('./utils/Router');
 
+/**初始化数据库连接*/
+database.init();
 /**
- * 信任往前第一个代理：可以正确取出客户端ip
+ * 支持X-Forwarded-Proto，
+ * 可以正确取出客户端ip
  */
-app.set('trust proxy', 1);
+app.proxy = true;
 /**
  * application/x-www-urlencoded
  * multipart/form-data

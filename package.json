@@ -8,6 +8,7 @@
   "dependencies": {
     "koa": "^2.5.1",
     "koa-body": "^4.0.3",
-    "koa-router": "^7.4.0"
+    "koa-router": "^7.4.0",
+    "mysql": "^2.15.0"
   }
 }
