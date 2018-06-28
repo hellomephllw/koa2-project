@@ -83,6 +83,8 @@ function transaction(callback) {
                 //打开事务
                 conn.beginTransaction(async err => {
                     if (err) {
+                        failJson.msg = err.sqlMessage;
+                        resolve(failJson);
                         //回滚
                         rollback();
                     } else {
