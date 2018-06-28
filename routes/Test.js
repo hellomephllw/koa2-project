@@ -13,3 +13,13 @@ router.get('/db', async ctx => {
     console.log(result);
     ctx.response.body = result;
 });
+
+router.get('/tran', async ctx => {
+    ctx.response.body = await tran(async conn => {
+        let tests = await db('select * from Test', [], conn);
+
+        console.log(tests);
+
+        return tests;
+    });
+});

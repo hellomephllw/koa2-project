@@ -4,13 +4,6 @@ const KoaBody = require('koa-body');
 const database = require('./utils/Database');
 global.router = require('./utils/Router');
 
-/**初始化数据库连接*/
-database.init();
-/**
- * 支持X-Forwarded-Proto，
- * 可以正确取出客户端ip
- */
-app.proxy = true;
 /**
  * application/x-www-urlencoded
  * multipart/form-data
@@ -18,6 +11,10 @@ app.proxy = true;
  * file uploads
  */
 app.use(KoaBody());
+/**初始化数据库连接*/
+database.init();
+/**支持X-Forwarded-Proto*/
+app.proxy = true;
 /**路由*/
 app.use(router.routes());
 app.use(router.allowedMethods());
