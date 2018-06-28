@@ -83,32 +83,37 @@ function transaction(callback) {
                 //打开事务
                 conn.beginTransaction(async err => {
                     if (err) {
-                        failJson.msg = err.sqlMessage;
-                        resolve(failJson);
                         //回滚
                         rollback();
+                        //返回错误结果
+                        failJson.msg = err.sqlMessage;
+                        resolve(failJson);
                     } else {
                         //返回连接给回调
                         let result = await callback(conn);
-                        if (result.code === undefined || result.code === null) {
-                            successJson.msg = result;
-                            result = successJson;
-                        }
                         //执行完毕后提交
-                        commit();
-                        //结束promise
-                        resolve(result);
+                        commit(result => {
+                            //responseJson的hack
+                            if (result.code === undefined || result.code === null) {
+                                successJson.msg = result;
+                                result = successJson;
+                            }
+                            //结束promise
+                            resolve(result);
+                        }, result);
                     }
 
                     /**提交函数*/
-                    function commit() {
+                    function commit(callback, result) {
                         conn.commit(err => {
                             if (err) {
                                 console.error('执行事务失败，' + err);
                                 rollback();
+                                result = err;
                             } else {
                                 conn.release();
                             }
+                            callback(result);
                         });
                     }
                     /**回滚*/
