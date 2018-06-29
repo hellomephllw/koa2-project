@@ -1,7 +1,9 @@
 const Koa = require('koa');
 const app = new Koa();
 const KoaBody = require('koa-body');
+const session = require('koa-session');
 const database = require('./utils/Database');
+global.redisStore = require('koa-redis')();
 global.router = require('./utils/Router');
 
 /**
@@ -15,6 +17,15 @@ app.use(KoaBody());
 database.init();
 /**支持X-Forwarded-Proto*/
 app.proxy = true;
+/**session*/
+app.keys = ['zhxj-tech'];//cookie加密
+app.use(session({
+    key: 'zhxjtech_game',
+    maxAge: 1000 * 60 * 20,
+    rolling: true,
+    prefix: 'game-session-',
+    store: redisStore,
+}, app));
 /**路由*/
 app.use(router.routes());
 app.use(router.allowedMethods());

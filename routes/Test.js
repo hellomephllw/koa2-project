@@ -23,3 +23,13 @@ router.get('/tran', async ctx => {
         return tests;
     });
 });
+
+router.get('/session/count', ctx => {
+    if (ctx.session.count) {
+        ctx.session.count++;
+    } else {
+        ctx.session.count = 1;
+    }
+
+    ctx.body = ctx.session.count;
+});
