@@ -1,23 +1,27 @@
 let koaRedis = require('koa-redis');
 
-let redisStore = koaRedis();
-
+global.redisStore = koaRedis();
 
 let RedisUtil = require('./utils/RedisUtil');
-// console.log(RedisUtil);
+
+global.RedisNames = require('./utils/RedisNames');
 
 async function test() {
-    // redisStore.client.hset('temp', 'name', 'hahahha');
-    // redisStore.client.expire('temp', 10);
-    // let val = await redisStore.client.hget('temp', 'name');
-    // console.log(val);
+    console.log(await RedisUtil.set.hasSet(RedisNames.longTailTestString));
 
-    // redisStore.client.hdel('temp', 'name');
-    // console.log(await redisStore.client.hget('temp', 'name'));
-    let val = await redisStore.client.sscan('myset1', 0);
-    console.log(val);
-    val = await redisStore.client.zrange('page_rank', 0, 1, 'WITHSCORES');
-    console.log(val);
+    RedisUtil.set.setSet(RedisNames.longTailTestString, [1, 1, 1, 5, 6, 7, 8, 9, 10, 11, 12, 13], -1);
+
+    console.log(await RedisUtil.set.hasSet(RedisNames.longTailTestString));
+
+    let result = await RedisUtil.set.getSet(RedisNames.longTailTestString);
+
+    console.log(result);
+
+    RedisUtil.set.removeSet(RedisNames.longTailTestString);
+
+    result = await RedisUtil.set.getSet(RedisNames.longTailTestString);
+
+    console.log(result);
 }
 
 test();
