@@ -45,7 +45,7 @@ let string = {
     expire(key, expire) {
         if (expire !== null && expire !== undefined) {
             if (expire === -1) {
-                expire = defaultFields.expireDefault;
+                expire = helper.expireDefault;
             }
             redisStore.client.expire(this.keyCategory(key), expire);
         }
@@ -65,8 +65,9 @@ let object = {
      * @param expire 过期时间(单位:秒)，如果不填，则没有过期时间，如果为-1，则使用默认时间
      */
     setObject(key, object, expire) {
+        this.removeObject(key);
         for (let fieldName in object) {
-            this.setField(key, fieldName, object[fieldName], expire);
+            this.setField(key, fieldName, helper.stringify(object[fieldName]));
         }
         this.expire(key, expire);
     },
@@ -82,7 +83,7 @@ let object = {
 
         for (let i = 0, len = keys.length; i < len; ++i) {
             let field = keys[i];
-            obj[field] = await redisStore.client.hget(finalKey, field);
+            obj[field] = helper.parse(await redisStore.client.hget(finalKey, field));
         }
 
         return keys.length === 0 ? null : obj;
@@ -101,7 +102,7 @@ let object = {
      * @param val 对象属性值
      */
     setField(key, field, val) {
-        redisStore.client.hset(this.keyCategory(key), field, val);
+        redisStore.client.hset(this.keyCategory(key), field, helper.stringify(val));
     },
     /**
      * 根据对象key和属性名称获取属性值
@@ -153,7 +154,7 @@ let object = {
     expire(key, expire) {
         if (expire !== null && expire !== undefined) {
             if (expire === -1) {
-                expire = defaultFields.expireDefault;
+                expire = helper.expireDefault;
             }
             redisStore.client.expire(this.keyCategory(key), expire);
         }
@@ -174,7 +175,8 @@ let list = {
      */
     setList(key, list, expire) {
         if (list instanceof Array) {
-            list.map(val => redisStore.client.rpush(this.keyCategory(key), val));
+            this.removeList(key);
+            list.map(val => redisStore.client.rpush(this.keyCategory(key), helper.stringify(val)));
             this.expire(key, expire);
         }
     },
@@ -185,8 +187,9 @@ let list = {
     getList: async function(key) {
         let finalKey = this.keyCategory(key);
         let len = await redisStore.client.llen(finalKey);
+        let list = await redisStore.client.lrange(finalKey, 0, len - 1);
 
-        return len === 0 ? null : redisStore.client.lrange(finalKey, 0, len - 1);
+        return len === 0 ? null : list.map(val => helper.parse(val));
     },
     /**
      * 删除list
@@ -208,7 +211,7 @@ let list = {
      * @param val 值
      */
     push(key, val) {
-        redisStore.client.rpush(this.keyCategory(key), val);
+        redisStore.client.rpush(this.keyCategory(key), helper.stringify(val));
     },
     /**
      * 在数组头部添加一个值
@@ -216,7 +219,7 @@ let list = {
      * @param val 值
      */
     unshift(key, val) {
-        redisStore.client.lpush(this.keyCategory(key), val);
+        redisStore.client.lpush(this.keyCategory(key), helper.stringify(val));
     },
     /**
      * 删除并返回最后一个值
@@ -276,7 +279,7 @@ let list = {
     expire(key, expire) {
         if (expire !== null && expire !== undefined) {
             if (expire === -1) {
-                expire = defaultFields.expireDefault;
+                expire = helper.expireDefault;
             }
             redisStore.client.expire(this.keyCategory(key), expire);
         }
@@ -297,7 +300,8 @@ let set = {
      */
     setSet(key, arr, expire) {
         if (arr instanceof Array) {
-            arr.map(val => redisStore.client.sadd(this.keyCategory(key), val));
+            this.removeSet(key);
+            arr.map(val => redisStore.client.sadd(this.keyCategory(key), helper.stringify(val)));
             this.expire(key, expire);
         }
     },
@@ -309,8 +313,9 @@ let set = {
     getSet: async function(key) {
         let finalKey = this.keyCategory(key);
         let len = await redisStore.client.scard(finalKey);
+        let set = await redisStore.client.smembers(finalKey);
 
-        return len === 0 ? null : redisStore.client.smembers(finalKey);
+        return len === 0 ? null : set.map(val => helper.parse(val));
     },
     /**
      * 删除set
@@ -333,7 +338,7 @@ let set = {
      * @param val 值
      */
     add(key, val) {
-        redisStore.client.sadd(this.keyCategory(key), val);
+        redisStore.client.sadd(this.keyCategory(key), helper.stringify(val));
     },
     /**
      * 移除值
@@ -341,7 +346,7 @@ let set = {
      * @param val 值
      */
     remove(key, val) {
-        redisStore.client.srem(this.keyCategory(key), val);
+        redisStore.client.srem(this.keyCategory(key), helper.stringify(val));
     },
     /**
      * 是否有该set
@@ -359,7 +364,7 @@ let set = {
     expire(key, expire) {
         if (expire !== null && expire !== undefined) {
             if (expire === -1) {
-                expire = defaultFields.expireDefault;
+                expire = helper.expireDefault;
             }
             redisStore.client.expire(this.keyCategory(key), expire);
         }
@@ -405,17 +410,55 @@ let sortSet = {
     expire(key, expire) {
         if (expire !== null && expire !== undefined) {
             if (expire === -1) {
-                expire = defaultFields.expireDefault;
+                expire = helper.expireDefault;
             }
             redisStore.client.expire(this.keyCategory(key), expire);
         }
     },
 };
 
-/**默认属性*/
-let defaultFields = {
+/**helper*/
+let helper = {
     /**默认过期时间*/
     expireDefault: 60 * 60 * 24,
+    /**数字的标记*/
+    numberMark: '__this_is_number__',
+    /**布尔值的标记*/
+    booleanMark: '__this_is_boolean__',
+    /**对象的标记*/
+    objectMark: '__this_is_object__',
+    /**
+     * 为val加标记
+     * @param val
+     * @return {*}
+     */
+    stringify(val) {
+        if (typeof val === 'boolean') {
+            val = this.booleanMark + val;
+        } else if (typeof val === 'number') {
+            val = this.numberMark + val;
+        } else if (val instanceof Object) {
+            val = this.objectMark + JSON.stringify(val);
+        }
+
+        return val;
+    },
+    /**
+     * 清除标记，还原val
+     * @param val
+     * @return {*}
+     */
+    parse(val) {
+        if (val.indexOf(this.booleanMark) !== -1) {
+            val = Boolean(val.slice(this.booleanMark.length));
+        } else if (val.indexOf(this.numberMark) !== -1) {
+            val = Number(val.slice(this.numberMark.length));
+        } else if (val.indexOf(this.objectMark) !== -1) {
+            val = JSON.parse(val.slice(this.objectMark.length));
+        }
+
+        return val;
+    },
 };
 
 module.exports = {
