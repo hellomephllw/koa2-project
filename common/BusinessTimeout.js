@@ -14,11 +14,17 @@ module.exports = function() {
             new Promise(function(resolve, reject) {
                 //使用一个闭包来执行下面的中间件
                 (async function() {
-                    await next();
+                    try {
+                        await next();
+                    } catch (e) {
+                        reject(e);//把错误交给catch
+                    }
                     clearTimeout(tmr);
                     resolve();
                 })();
+            }).catch(function(e) {
+                throw e;
             })
-        ])
+        ]);
     };
 };

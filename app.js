@@ -11,7 +11,6 @@ global.router = require('./utils/Router');
 
 const IO = require('koa-socket-2');
 const io = new IO();
-io.attach(app);
 
 /**错误处理*/
 app.use(BusinessError.init());
@@ -34,6 +33,7 @@ app.use(router.allowedMethods());
 require('./routes');
 
 
+io.attach(app);
 
 io.on('my other event', (ctx, data) => {
     ctx.socket.emit('news', { hello: 'world' });
