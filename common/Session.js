@@ -33,6 +33,7 @@ module.exports = {
     /**
      * 根据属性名称获取属性值
      * @param field 属性名称
+     * @return {Promise}属性值
      */
     get: async function (field) {
         let token = await this._getToken();
@@ -68,7 +69,7 @@ module.exports = {
     },
     /**
      * 获取token
-     * @return {Promise.<null>}
+     * @return {Promise}token
      * @private
      */
     _getToken: async function () {
@@ -96,12 +97,19 @@ module.exports = {
      * 获取值
      * @param key token的key
      * @param field 属性名称
+     * @return {Promise}token的属性值
      * @private
      */
     _getTokenVal(key, field) {
         return RedisUtil.object.getFieldVal(key, field);
     },
-    toString() {
+    /**
+     * 获取存入Session的Token对象
+     * @return {Promise}
+     */
+    getSession: async function() {
+        let token = await this._getToken();
 
-    },
+        return RedisUtil.object.getObject(token.key);
+    }
 };

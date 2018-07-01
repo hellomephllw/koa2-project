@@ -47,6 +47,7 @@ router.get('/session/count', async ctx => {
     let openId = await Session.get('openId');
 
     console.log(count, openId);
+    console.log(await Session.getSession());
 
     if (!count) {
         count = 1;
