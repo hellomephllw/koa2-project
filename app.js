@@ -1,6 +1,7 @@
 const Koa = require('koa');
 const app = new Koa();
 const KoaBody = require('koa-body');
+const IO = require('koa-socket-2');
 const database = require('./utils/Database');
 const CorsHeader = require('./common/response/CorsHeader');
 const BusinessError = require('./common/BusinessError');
@@ -8,9 +9,7 @@ const BusinessTimeout = require('./common/BusinessTimeout');
 global.Session = require('./common/Session');
 global.redisStore = require('koa-redis')();
 global.router = require('./utils/Router');
-
-const IO = require('koa-socket-2');
-const io = new IO();
+global.IOHelper = require('./utils/IOHelper');
 
 /**错误处理*/
 app.use(BusinessError.init());
@@ -30,24 +29,7 @@ app.proxy = true;
 app.use(router.routes());
 app.use(router.allowedMethods());
 /**加载所有路由*/
-require('./routes');
-
-
-io.attach(app);
-
-io.on('my other event', (ctx, data) => {
-    ctx.socket.emit('news', { hello: 'world' });
-});
-
-io.on('connection', (ctx, data) => {
-    console.log('conn', new Date().getTime());
-    console.log(data);
-});
-
-io.on('disconnect', (ctx, data) => {
-    console.log('disconn', new Date().getTime());
-    console.log(data);
-});
+require('./routes')(IO, app);
 
 /**开启服务*/
 app.listen(3601);
