@@ -11,6 +11,9 @@
     "koa-redis": "^3.1.2",
     "koa-router": "^7.4.0",
     "koa-session": "^5.8.1",
+    "koa-socket-2": "^1.0.17",
+    "koa-socket-session": "^1.2.0",
+    "koa-websocket": "^5.0.1",
     "mysql": "^2.15.0"
   }
 }

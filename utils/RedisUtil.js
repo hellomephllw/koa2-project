@@ -34,7 +34,7 @@ let string = {
      * @param key
      * @return bool
      */
-    hasString: async function(key) {
+    hasString: async function (key) {
         return (await redisStore.client.exists(this.keyCategory(key))) === 1;
     },
     /**
@@ -47,6 +47,7 @@ let string = {
             if (expire === -1) {
                 expire = helper.expireDefault;
             }
+
             redisStore.client.expire(this.keyCategory(key), expire);
         }
     },
@@ -76,7 +77,7 @@ let object = {
      * @param key 对象key
      * @return {Object}对象key对应的对象
      */
-    getObject: async function(key) {
+    getObject: async function (key) {
         let obj = {};
         let finalKey = this.keyCategory(key);
         let keys = await redisStore.client.hkeys(finalKey);
@@ -126,7 +127,7 @@ let object = {
      * @param key 对象对应的key
      * @return bool
      */
-    hasObject: async function(key) {
+    hasObject: async function (key) {
         return (await redisStore.client.exists(this.keyCategory(key))) === 1;
     },
     /**
@@ -135,7 +136,7 @@ let object = {
      * @param field 对象属性名称
      * @return bool
      */
-    hasField: async function(key, field) {
+    hasField: async function (key, field) {
         return (await redisStore.client.hexists(this.keyCategory(key), field)) === 1;
     },
     /**
@@ -184,7 +185,7 @@ let list = {
      * 获取list
      * @param key list的key
      */
-    getList: async function(key) {
+    getList: async function (key) {
         let finalKey = this.keyCategory(key);
         let len = await redisStore.client.llen(finalKey);
         let list = await redisStore.client.lrange(finalKey, 0, len - 1);
@@ -268,7 +269,7 @@ let list = {
      * 是否存在该list
      * @param key list的key
      */
-    hasList: async function(key) {
+    hasList: async function (key) {
         return (await redisStore.client.exists(this.keyCategory(key))) === 1;
     },
     /**
@@ -310,7 +311,7 @@ let set = {
      * @param key set的key
      * @return set集合
      */
-    getSet: async function(key) {
+    getSet: async function (key) {
         let finalKey = this.keyCategory(key);
         let len = await redisStore.client.scard(finalKey);
         let set = await redisStore.client.smembers(finalKey);
@@ -353,7 +354,7 @@ let set = {
      * @param key set的key
      * @return bool
      */
-    hasSet: async function(key) {
+    hasSet: async function (key) {
         return (await redisStore.client.exists(this.keyCategory(key))) === 1;
     },
     /**
@@ -435,7 +436,7 @@ let helper = {
     stringify(val) {
         if (typeof val === 'boolean') {
             val = this.booleanMark + val;
-        } else if (typeof val === 'number') {
+        } else if (typeof val === 'number' && !isNaN(NaN)) {
             val = this.numberMark + val;
         } else if (val instanceof Object) {
             val = this.objectMark + JSON.stringify(val);

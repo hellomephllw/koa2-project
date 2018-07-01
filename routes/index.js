@@ -1,2 +1,2 @@
 /**加载所有路由*/
-require('./Test');
+require('./TestRouter');
