@@ -29,7 +29,7 @@ router.get('/tran', async ctx => {
 
 router.post('/login', async ctx => {
     //获取tokenKey
-    let tokenKey = TokenUtil.getTokenKeyFromHeader(ctx.request);
+    let tokenKey = TokenUtil.getTokenKeyFromParams(ctx.request);
     //没有tokenKey或过期，生成新token
     if (!tokenKey || await TokenUtil.alreadyExpire(tokenKey)) {
         tokenKey = TokenUtil.createToken(IDUtil.getRandomNumId(), 'tom');
@@ -42,7 +42,7 @@ router.post('/login', async ctx => {
     };
 });
 
-router.get('/session/count', async ctx => {
+router.post('/session/count', async ctx => {
     let count = await Session.get('count');
     let openId = await Session.get('openId');
 

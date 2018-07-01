@@ -2,12 +2,12 @@ const RedisUtil = require('./RedisUtil');
 
 module.exports = {
     /**
-     * 从请求头中获取token的key
+     * 从请求查询参数中获取token的key
      * @param request 请求
-     * @return token的key
+     * @return {*}token的key
      */
-    getTokenKeyFromHeader(request) {
-        return request.get('token');
+    getTokenKeyFromParams(request) {
+        return request.query.token;
     },
     /**
      * 根据key获取token对象
@@ -23,7 +23,7 @@ module.exports = {
      * @return Promise(token对象)
      */
     getTokenByRequest(request) {
-        let key = this.getTokenKeyFromHeader(request);
+        let key = this.getTokenKeyFromParams(request);
         return RedisUtil.object.getObject(key);
     },
     /**

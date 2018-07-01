@@ -73,7 +73,7 @@ module.exports = {
      * @private
      */
     _getToken: async function () {
-        if (!this.token) {
+        if (!this.token || !(await this.token)) {
             this.token = TokenUtil.getTokenByRequest(this.request);
             if (await this.token === null) {
                 throw new Error(110);
