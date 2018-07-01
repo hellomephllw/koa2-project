@@ -27,6 +27,20 @@ router.get('/tran', async ctx => {
     });
 });
 
+router.post('/timeout', async ctx => {
+
+    await execute();
+
+    ctx.response.body = 'waiting for 10s';
+    async function execute() {
+        return new Promise(function(resolve) {
+            setTimeout(() => {
+                resolve();
+            }, 10000);
+        });
+    }
+});
+
 router.post('/login', async ctx => {
     //获取tokenKey
     let tokenKey = TokenUtil.getTokenKeyFromParams(ctx.request);

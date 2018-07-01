@@ -4,6 +4,7 @@ const KoaBody = require('koa-body');
 const database = require('./utils/Database');
 const CorsHeader = require('./common/response/CorsHeader');
 const BusinessError = require('./common/BusinessError');
+const BusinessTimeout = require('./common/BusinessTimeout');
 global.Session = require('./common/Session');
 global.redisStore = require('koa-redis')();
 global.router = require('./utils/Router');
@@ -15,7 +16,7 @@ io.attach(app);
 /**错误处理*/
 app.use(BusinessError.init());
 /**超时处理*/
-
+app.use(BusinessTimeout());
 /**CORS处理*/
 app.use(CorsHeader());
 /**初始化session*/
