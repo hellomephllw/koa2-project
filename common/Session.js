@@ -3,6 +3,7 @@ const MD5Util = require('../utils/Md5Util');
 const IDUtil = require('../utils/IdUtil');
 const TokenUtil = require('../utils/TokenUtil');
 const RedisUtil = require('../utils/RedisUtil');
+const BusinessError = require('./BusinessError');
 
 module.exports = {
     /**key的前缀*/
@@ -11,8 +12,6 @@ module.exports = {
     maxAge: 60 * 20,
     request: null,
     response: null,
-    /**session的token对象(Promise对象)*/
-    token: null,
     /**初始化session*/
     init() {
         return async (ctx, next) => {
@@ -48,9 +47,17 @@ module.exports = {
         if (second === undefined || second === null) {
             second = this.maxAge;
         }
-        let token = await this.token;
+        let token = await this._getToken();
 
         RedisUtil.object.expire(token.key, second);
+    },
+    /**
+     * 更新过期时间
+     * @param key token的key
+     * @private
+     */
+    _refresh: async function (key) {
+        RedisUtil.object.expire(key, this.maxAge);
     },
     /**
      * 创建session
@@ -73,15 +80,13 @@ module.exports = {
      * @private
      */
     _getToken: async function () {
-        if (!this.token || !(await this.token)) {
-            this.token = TokenUtil.getTokenByRequest(this.request);
-            if (await this.token === null) {
-                throw new Error(110);
-            }
+        let token = await TokenUtil.getTokenByRequest(this.request);
+        if (token === null) {
+            throw new Error(BusinessError.tokenExpireError.errorType);
         }
-        this.refresh();
+        this._refresh(token.key);
 
-        return await this.token;
+        return token;
     },
     /**
      * 存入键值对

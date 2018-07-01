@@ -3,6 +3,7 @@ const app = new Koa();
 const KoaBody = require('koa-body');
 const database = require('./utils/Database');
 const CorsHeader = require('./common/response/CorsHeader');
+const BusinessError = require('./common/BusinessError');
 global.Session = require('./common/Session');
 global.redisStore = require('koa-redis')();
 global.router = require('./utils/Router');
@@ -11,21 +12,12 @@ const IO = require('koa-socket-2');
 const io = new IO();
 io.attach(app);
 
+/**错误处理*/
+app.use(BusinessError.init());
+/**超时处理*/
+
 /**CORS处理*/
 app.use(CorsHeader());
-/**错误处理*/
-app.use(async (ctx, next) => {
-    console.log('=====');
-    try {
-        await next();
-    } catch (e) {
-        if (e.message === '110') {//token过期
-            ctx.response.body = {
-                msg: 'token已过期',
-            };
-        }
-    }
-});
 /**初始化session*/
 app.use(Session.init());
 /**application/x-www-urlencoded、multipart/form-data、application/json、file uploads*/

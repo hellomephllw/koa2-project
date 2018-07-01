@@ -46,6 +46,7 @@ router.post('/session/count', async ctx => {
     let count = await Session.get('count');
     let openId = await Session.get('openId');
 
+    console.log(ctx.request.query);
     console.log(count, openId);
     console.log(await Session.getSession());
 
