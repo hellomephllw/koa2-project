@@ -9,7 +9,7 @@ const BusinessTimeout = require('./common/BusinessTimeout');
 global.Session = require('./common/Session');
 global.redisStore = require('koa-redis')();
 global.router = require('./utils/Router');
-global.IOHelper = require('./utils/IOHelper');
+global.WSHelper = require('./utils/WSHelper');
 
 /**错误处理*/
 app.use(BusinessError.init());

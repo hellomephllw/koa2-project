@@ -1,4 +1,4 @@
-module.exports = IOHelper('/longTail')(io => {
+module.exports = WSHelper('/longTail')(io => {
     io.on('my other event', async (ctx, data) => {
         console.log(data);
         ctx.socket.emit('news', { hello: 'world' });
